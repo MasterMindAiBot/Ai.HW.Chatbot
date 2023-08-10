@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1A202C;
+            margin: 0;
+            padding: 0;
+            color: #F7FAFC;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #38B2AC;
+        }
+
+        .persona-selector {
+            margin-bottom: 10px;
+            color: #F7FAFC;
+        }
+
+        .chatbox {
+            background: #2D3748;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            height: 50vh;
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 12px;
+            margin: 10px 0;
+            max-width: 70%;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background-color: #38B2AC;
+            color: #1A202C;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            background-color: #4A5568;
+            color: #F7FAFC;
+            align-self: flex-start;
+        }
+
+        .input-container {
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+        }
+
+        .userinput {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+            font-size: 1em;
+        }
+
+        .sendbutton {
+            padding: 10px;
+            background-color: #38B2AC;
+            border: none;
+            color: #F7FAFC;
+            cursor: pointer;
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">Chat Bot</div>
+        <div class="persona-selector">
+            <label for="persona">Select Persona:</label>
+            <select id="persona" style="color: #F7FAFC; background: #2D3748;">
+                <option value="math_teacher">Math Teacher</option>
+                <option value="english_teacher">English Teacher</option>
+                <option value="history_teacher">History Teacher</option>
+                <option value="science_teacher">Science Teacher</option>
+                <option value="art_teacher">Art Teacher</option>
+                <option value="music_teacher">Music Teacher</option>
+                <option value="physical_ed_teacher">Physical Education Teacher</option>
+                <option value="psychology_teacher">Psychology Teacher</option>
+            </select>
+        </div>
+        <div class="chatbox" id="chatbox">
+            <!-- Chat messages will be added here -->
+        </div>
+        <div class="input-container">
+            <input class="userinput" type="text" placeholder="Type a message...">
+            <button class="sendbutton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        $(".sendbutton").click(function() {
+            var userinput = $(".userinput").val();
+            if(userinput.trim() === '') return; // do not send blank messages
+
+            var persona = $("#persona").val(); // Get selected persona
+
+            $("#chatbox").append('<div class="message user">' + userinput + '</div>');
+            $(".userinput").val("");
+
+            // simulate bot thinking
+            $("#chatbox").append('<div class="message bot">...</div>');
+
+            $.ajax({
+                url: "/get_response",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ "message": userinput, "persona": persona }), // Include persona in data
+                success: function(data) {
+                    $(".chatbox .message.bot").last().remove(); // remove the "thinking" message
+                    $("#chatbox").append('<div class="message bot">' + data.response + '</div>');
+
+                    // Scroll chatbox to bottom
+                    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight);
+                }
+            });
+        });
+
+        // Allow the "Enter" key to send the message
+        $(".userinput").keypress(function(e) {
+            if(e.which == 13) {
+                $(".sendbutton").click();
+            }
+        });
+    </script>
+</body>
+</html>
